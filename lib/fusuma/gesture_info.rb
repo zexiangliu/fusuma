@@ -8,8 +8,48 @@ module Fusuma
     end
     attr_reader :finger, :direction, :action_type
 
-    def trigger_keyevent
-      exec_xdotool(shortcut)
+    def trigger_keyevent(history)
+      shortc = shortcut
+      unless shortc.nil?
+             case history
+	     when "mousedown 1"
+		if(@finger >=3)
+                   shortc = "mouseup 1"
+		end
+	      when "keydown alt+Tab keyup Tab"
+		hist = history
+		if(@finger == 4 && @direction == "left")
+                   shortc = "shift+Tab"
+		elsif (@finger == 4 && @direction == "right")
+		   shortc = "Tab"
+		elsif (shortc == history||@finger == 4 && @direction == 'up')
+		   shortc = "Escape keyup alt"
+		   hist = "exit"
+		elsif (@finger == 4 && @direction == "down")
+	 	   shortc = "keyup alt"
+		   hist = "exit"
+		else
+		   shortc = "keyup alt key #{shortc}"
+		   hist = "exit"
+		end
+             	exec_xdotool(shortc)
+		return hist
+	      when "super+s"
+		if(shortc == "shift+super+w")
+		    shortc = history 
+		end
+		shortc += " "
+	      when "shift+super+w"
+		if(shortc == "super+s")
+		    shortc = history 
+		end
+		shortc += " "
+	      end
+	      
+        end
+
+      exec_xdotool(shortc)
+      shortc
     end
 
     private

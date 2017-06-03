@@ -9,11 +9,13 @@ require_relative 'fusuma/config.rb'
 require 'logger'
 require 'open3'
 require 'yaml'
+#require 'pry'
 
 # this is top level module
 module Fusuma
   # main class
   class Runner
+    @@history = nil
     class << self
       def run(option = {})
         read_options(option)
@@ -37,11 +39,37 @@ module Fusuma
         o.each do |line|
           #puts line.to_s
           gesture_action = GestureAction.initialize_by(line, device_names)
-          next if gesture_action.nil?
+	  if gesture_action.nil?
+	     line_s = line.to_s
+	     if(@@history == "keydown alt+Tab keyup Tab")
+		if(line_s =~ /KEY_ENTER(.*)/)
+		   `xdotool key keyup alt`
+		    @@history = "exit"
+		elsif(line_s =~ /KEY_ESC(.*)/)
+		   `xdotool key Escape keyup alt`
+		   @@history = "exit"
+		elsif(line_s =~ /BTN_LEFT(.*)/)
+		    if(line_s =~ /released(.*)/)
+		        `xdotool click 1 keyup alt`
+			@@history = "exit"
+		    end
+		end
+	     elsif(@@history == "super+s" || @@history == "shift+super+w")
+		if(line_s =~ /BTN_LEFT(.*)/)
+		   if(line_s =~ /released(.*)/)
+			`xdotool click 1`
+			@@history = "exit"
+		   end
+		end
+	     end
+	     next
+	  end
+          #next if gesture_action.nil?
           @action_stack ||= ActionStack.new
           @action_stack.push gesture_action
           gesture_info = @action_stack.gesture_info
-          gesture_info.trigger_keyevent unless gesture_info.nil?
+	  @@history = gesture_info.trigger_keyevent(@@history) unless gesture_info.nil?
+	  #puts @@history
         end
       end
     end
@@ -70,7 +98,7 @@ module Fusuma
       return @libinput_command if @libinput_command
       # NOTE: --enable-dwt means "disable while typing"
       prefix = 'stdbuf -oL --'
-      command = 'libinput-debug-events --enable-dwt'
+      command = 'libinput-debug-events --enable-dwt --enable-tap'
       device_option = if device_names.size == 1
                         "--device /dev/input/#{device_names.first}"
                       end
