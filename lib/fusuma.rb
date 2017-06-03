@@ -35,6 +35,7 @@ module Fusuma
     def read_libinput
       Open3.popen3(libinput_command) do |_i, o, _e, _w|
         o.each do |line|
+          #puts line.to_s
           gesture_action = GestureAction.initialize_by(line, device_names)
           next if gesture_action.nil?
           @action_stack ||= ActionStack.new

@@ -91,7 +91,12 @@ module Fusuma
 
     def detect_action_type
       first.action =~ /GESTURE_(.*?)_/
-      Regexp.last_match(1).downcase
+      action_ext = Regexp.last_match(1).downcase
+      if(action_ext == 'pinch' && Integer(first.finger) >= 3)
+            action_ext = 'swipe'
+      end
+      #puts action_ext,first.finger
+      action_ext
     end
   end
 end

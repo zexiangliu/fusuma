@@ -17,6 +17,7 @@ module Fusuma
 
     def enough?
       MultiLogger.debug(x: x, y: y)
+      #puts "swith enough?", enough_distance?, enough_interval?
       enough_distance? && enough_interval? && self.class.touch_last_time
     end
 
@@ -28,6 +29,7 @@ module Fusuma
 
     def enough_interval?
       return true if first_time?
+      #puts Time.now - self.class.last_time
       return true if (Time.now - self.class.last_time) > interval_time
       false
     end
