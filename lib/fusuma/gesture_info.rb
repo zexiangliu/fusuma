@@ -19,9 +19,9 @@ module Fusuma
 	      when "keydown alt+Tab keyup Tab"
 		hist = history
 		if(@finger == 4 && @direction == "left")
-                   shortc = "shift+Tab"
+                   shortc = "Tab"
 		elsif (@finger == 4 && @direction == "right")
-		   shortc = "Tab"
+		   shortc = "shift+Tab"
 		elsif (shortc == history||@finger == 4 && @direction == 'up')
 		   shortc = "Escape keyup alt"
 		   hist = "exit"
@@ -44,8 +44,18 @@ module Fusuma
 		    shortc = history 
 		end
 		shortc += " "
+	      when "super+a"
+		if(shortc == "super+a")
+		    shortc = "super" 
+		end
+		shortc += " "
+	      when "super"
+		if(shortc == "super+A")
+		    shortc = history 
+		end
+		shortc += " "
 	      end
-	      
+
         end
 
       exec_xdotool(shortc)

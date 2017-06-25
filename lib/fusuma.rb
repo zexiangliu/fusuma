@@ -39,8 +39,12 @@ module Fusuma
         o.each do |line|
           #puts line.to_s
           gesture_action = GestureAction.initialize_by(line, device_names)
+	  # patches
 	  if gesture_action.nil?
 	     line_s = line.to_s
+	     if(line_s =~ /BTN_MIDDLE/&&line_s =~ /released/)
+		`xdotool key --delay 30 ctrl+c key ctrl+d`
+	     end
 	     if(@@history == "keydown alt+Tab keyup Tab")
 		if(line_s =~ /KEY_ENTER(.*)/)
 		   `xdotool key keyup alt`
@@ -61,6 +65,14 @@ module Fusuma
 			@@history = "exit"
 		   end
 		end
+	     elsif(@@history == "super+a" || @@history == "super")
+		if(line_s =~ /BTN_LEFT(.*)/)
+		   if(line_s =~ /released(.*)/)
+			`xdotool click 1`
+			@@history = "exit"
+		   end
+		end
+
 	     end
 	     next
 	  end
@@ -98,7 +110,7 @@ module Fusuma
       return @libinput_command if @libinput_command
       # NOTE: --enable-dwt means "disable while typing"
       prefix = 'stdbuf -oL --'
-      command = 'libinput-debug-events --enable-dwt --enable-tap'
+      command = 'libinput-debug-events --enable-dwt --enable-tap --enable-middlebutton'
       device_option = if device_names.size == 1
                         "--device /dev/input/#{device_names.first}"
                       end
